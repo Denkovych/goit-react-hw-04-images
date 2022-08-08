@@ -16,7 +16,7 @@ class App extends Component {
     hits: [],
     totalHits: 0,
     requestValue: '',
-    page: 1,
+    page: 0,
     loading: false,
     modalId: '',
   };
