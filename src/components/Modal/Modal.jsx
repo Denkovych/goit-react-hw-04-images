@@ -36,4 +36,4 @@ export default function Modal({ closeModal, hits, modalId }) {
 Modal.propTypes = {
   hits: PropTypes.array.isRequired,
   modalId: PropTypes.string.isRequired,
-  closeModal: PropTypes.func.isRequired,
+  closeModal: PropTypes.func.isRequired,}
