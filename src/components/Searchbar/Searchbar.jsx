@@ -1,56 +1,45 @@
-import { Component } from 'react';
+import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 import s from './Searchbar.module.css';
 
-class Searchbar extends Component {
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-  };
+export default function Searchbar({ onSubmit }) {
+  const [requestValue, setRequestValue] = useState('');
 
-  state = {
-    requestValue: '',
-  };
-
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
 
-    if (this.state.requestValue.trim() === '') {
+    if (requestValue.trim() === '') {
       return Notify.info('Запрос не может быть пустым');
     }
-    this.props.onSubmit(this.state.requestValue);
+    onSubmit(requestValue);
 
-    this.setState({ requestValue: '' });
+    setRequestValue('');
   };
 
-  handleChange = event => {
-    this.setState({
-      requestValue: event.target.value,
-    });
-  };
+  return (
+    <header className={s.searchbar}>
+      <form className={s.form} onSubmit={handleSubmit}>
+        <button type="submit" className={s.button}>
+          <span className={s.buttonLabel}>Search</span>
+        </button>
 
-  render() {
-    return (
-      <header className={s.searchbar}>
-        <form className={s.form} onSubmit={this.handleSubmit}>
-          <button type="submit" className={s.button}>
-            <span className={s.buttonLabel}>Search</span>
-          </button>
-
-          <input
-            value={this.state.requestValue}
-            onChange={this.handleChange}
-            className={s.input}
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-          />
-        </form>
-      </header>
-    );
-  }
+        <input
+          value={requestValue}
+          onChange={event => setRequestValue(event.target.value)}
+          className={s.input}
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+        />
+      </form>
+    </header>
+  );
 }
 
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
 export default Searchbar;
