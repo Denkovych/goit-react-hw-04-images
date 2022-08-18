@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect } from 'react';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 
 import Searchbar from './Searchbar/Searchbar';
@@ -11,96 +11,80 @@ import Modal from './Modal/Modal';
 
 import s from './App.module.css';
 
-class App extends Component {
-  state = {
-    hits: [],
-    totalHits: 0,
-    requestValue: '',
-    page: 0,
-    loading: false,
-    modalId: '',
-  };
+function App() {
+  const [hits, setHits] = useState([]);
+  const [totalHits, setTotalHits] = useState(0);
+  const [requestValue, setRequestValue] = useState('');
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [modalId, setModalId] = useState('');
+  const SECRET_KEY = '27409916-238dc54d0ca856be32d436daf';
 
-  #SECRET_KEY = '27409916-238dc54d0ca856be32d436daf';
-
-  componentDidUpdate(prevProps, prevState) {
-    const { page, requestValue, hits, totalHits } = this.state;
+  useEffect(() => {
     const ifResponceOk = data => {
       data.totalHits === 0 && Notify.failure('Ничего не найдено');
-      this.setState(
-        page === 1
-          ? {
-              hits: [...data.hits],
-              totalHits: data.totalHits,
-            }
-          : { hits: [...prevState.hits, ...data.hits] }
-      );
+      if (page === 1) {
+        setHits([...data.hits]);
+        setTotalHits(data.totalHits);
+        return;
+      }
+      setHits(prevState => [...prevState, ...data.hits]);
+      return;
     };
 
-    if (requestValue !== prevState.requestValue || page !== prevState.page) {
-      this.setState({ loading: true });
+    if (requestValue.trim()) {
+      setLoading(true);
       fetchImages({
         requestValue: requestValue,
-        secretKey: this.#SECRET_KEY,
+        secretKey: SECRET_KEY,
         page: page,
       })
         .then(ifResponceOk)
         .catch(Notify.failure)
-        .finally(() => this.setState({ loading: false }));
+        .finally(() => setLoading(false));
     }
+  }, [requestValue, page]);
 
-    
-    if (prevState.totalHits !== totalHits && totalHits !== 0) {
-      Notify.success(`Найдено ${totalHits} картинок`);
-    }
+  useEffect(() => {
+    totalHits !== 0 && Notify.success(`Найдено ${totalHits} картинок`);
+  }, [totalHits]);
 
-    
-    if (
-      hits.length !== 0 &&
-      hits.length === totalHits &&
-      prevState.hits.length !== hits.length
-    ) {
+  useEffect(() => {
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      left: 0,
+      behavior: 'smooth',
+    });
+  }, [hits]);
+
+  useEffect(() => {
+    if (hits.length !== 0 && hits.length === totalHits) {
       Notify.info('Загружены все картинки');
     }
+  }, [hits, totalHits]);
 
-    
-    if (prevState.hits.length !== hits.length) {
-      window.scrollTo({
-        top: document.documentElement.scrollHeight,
-        left: 0,
-        behavior: 'smooth',
-      });
-    }
-  }
-
-  toggleModal = (modalId = '') => {
-    this.setState({ modalId });
+  const toggleModal = (modalId = '') => {
+    setModalId(modalId);
   };
 
-  changePage = () => {
-    this.setState(() => ({ page: this.state.page + 1 }));
+  const handleSubmit = requestValue => {
+    setRequestValue(requestValue);
+    setPage(1);
   };
 
-  handleSubmit = requestValue => {
-    this.setState({ requestValue, page: 1 });
-  };
-
-  render() {
-    const { hits, loading, modalId, totalHits } = this.state;
-    return (
-      <div className={s.container}>
-        <Searchbar onSubmit={this.handleSubmit} />
-        <ImageGallery hits={hits} openModal={this.toggleModal} />
-        {Boolean(hits.length) && !loading && hits.length !== totalHits && (
-          <Button changePage={this.changePage} />
-        )}
-        {loading && <ThreeDots color="#00BFFF" height={80} width={80} />}
-        {modalId && (
-          <Modal hits={hits} modalId={modalId} closeModal={this.toggleModal} />
-        )}
-      </div>
-    );
-  }
+  return (
+    <div className={s.container}>
+      <Searchbar onSubmit={handleSubmit} />
+      <ImageGallery hits={hits} openModal={toggleModal} />
+      {Boolean(hits.length) && !loading && hits.length !== totalHits && (
+        <Button changePage={() => setPage(prevState => prevState + 1)} />
+      )}
+      {loading && <ThreeDots color="#00BFFF" height={80} width={80} />}
+      {modalId && (
+        <Modal hits={hits} modalId={modalId} closeModal={toggleModal} />
+      )}
+    </div>
+  );
 }
 
 export { App };
