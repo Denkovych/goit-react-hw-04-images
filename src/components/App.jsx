@@ -22,7 +22,7 @@ function App() {
 
   useEffect(() => {
     const ifResponceOk = data => {
-      data.totalHits === 0 && Notify.failure('Ничего не найдено');
+      data.totalHits === 0 && Notify.failure('Нічого не знайдено');
       if (page === 1) {
         setHits([...data.hits]);
         setTotalHits(data.totalHits);
@@ -46,7 +46,7 @@ function App() {
   }, [requestValue, page]);
 
   useEffect(() => {
-    totalHits !== 0 && Notify.success(`Найдено ${totalHits} картинок`);
+    totalHits !== 0 && Notify.success(`Знайдено ${totalHits} картинок`);
   }, [totalHits]);
 
   useEffect(() => {
@@ -59,7 +59,7 @@ function App() {
 
   useEffect(() => {
     if (hits.length !== 0 && hits.length === totalHits) {
-      Notify.info('Загружены все картинки');
+      Notify.info('Всі картинки завантажено');
     }
   }, [hits, totalHits]);
 
