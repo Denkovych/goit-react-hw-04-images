@@ -11,7 +11,7 @@ export default function Searchbar({ onSubmit }) {
     event.preventDefault();
 
     if (requestValue.trim() === '') {
-      return Notify.info('Запрос не может быть пустым');
+      return Notify.info('Запит не може бути пустим');
     }
     onSubmit(requestValue);
 
